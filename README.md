@@ -28,7 +28,7 @@ I don't want to write these super simplistic methods for classes, I'd rather foc
 
 ```rust
 struct Person {
-	name: String,
+    name: String,
     age: u64,
 }
 
@@ -63,7 +63,7 @@ extern crate attr;
 
 #[attr_accessor(name, age)]
 struct Person {
-	name: String,
+    name: String,
     age: u64,
 }
 
@@ -85,15 +85,15 @@ attr = "0.1.0"
 
 #### :x: Duplicate attributes
 
-In Ruby the `attr` macros are provided `Symbols` which are required to be unique and therefore this crate seeks to emulate that behavior, mostly because it just makes sense, and therefore will error on duplicate fields.
+In Ruby the `attr` macros are provided `Symbols` which are required to be unique and therefore this crate seeks to emulate that behavior, mostly because it just makes sense, and therefore will error on duplicate fields
 
 #### :x: Unknown attribute
 
-Creating getters and setters for an nonexistent field in a `struct` makes no sense.
+Creating getters and setters for an nonexistent field in a `struct` makes no sense
 
 #### :x: Provided attribute isn't an Identifier
 
-Providing a `Literal` like `6` to create a getters and setters for makes no sense and neither does providing a `Group` like `(Hello)`.
+Providing a `Literal` like `6` to create a getters and setters for makes no sense and neither does providing a `Group` like `(Hello)`
 
 _All Errors are compile time errors_
 
