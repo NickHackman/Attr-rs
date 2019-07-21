@@ -1,5 +1,5 @@
 //! This Crate is heavily inspired by Ruby's `attr_reader`, `attr_writer`, and `attr_accessor`
-//! macros, these auto generate getters/setters so that you can waste less time writing the
+//! macros, these auto generate getters/setters so that you spend less time writing the
 //! same simple code and can focus more on the interesting parts of your project!
 //!
 //! This Library provides `3` macros
@@ -115,7 +115,7 @@ fn relate_args_to_fields(args: TokenStream, fields: Fields) -> HashMap<String, T
                 let ident = ident.to_string();
                 match fields
                     .iter()
-                    .find(|v| return v.ident.clone().unwrap() == ident)
+                    .find(|v| return v.ident.as_ref().unwrap().to_string() == ident)
                 {
                     Some(field) => {
                         if map.contains_key(&ident) {
@@ -182,9 +182,10 @@ pub fn attr_reader(args: TokenStream, input: TokenStream) -> TokenStream {
     for (key, value) in getters.iter() {
         getter_fns.push(create_getter(key, value));
     }
+    let (impl_generics, ty_generics, where_clause) = structure.generics.split_for_impl();
     (quote! {
         #structure
-        impl #structure_name {
+        impl #impl_generics #structure_name #ty_generics #where_clause {
             #(#getter_fns)*
         }
     })
@@ -240,9 +241,10 @@ pub fn attr_writer(args: TokenStream, input: TokenStream) -> TokenStream {
     for (key, value) in setters.iter() {
         setter_fns.push(create_setter(key, value));
     }
+    let (impl_generics, ty_generics, where_clause) = structure.generics.split_for_impl();
     (quote! {
         #structure
-        impl #structure_name {
+        impl #impl_generics #structure_name #ty_generics #where_clause {
             #(#setter_fns)*
         }
     })
@@ -309,9 +311,10 @@ pub fn attr_accessor(args: TokenStream, input: TokenStream) -> TokenStream {
         fns.push(create_setter(key, value));
         fns.push(create_getter(key, value));
     }
+    let (impl_generics, ty_generics, where_clause) = structure.generics.split_for_impl();
     (quote! {
         #structure
-        impl #structure_name {
+        impl #impl_generics #structure_name #ty_generics #where_clause {
             #(#fns)*
         }
     })
