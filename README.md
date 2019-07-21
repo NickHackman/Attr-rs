@@ -1,8 +1,6 @@
 # Attr-rs
 
-<img src="https://www.rustacean.net/assets/cuddlyferris.svg" alt="Ferris" width="48px" height="48px">
-<img src="https://img.icons8.com/officel/40/000000/hearts.png">
-<img src="https://img.icons8.com/color/48/000000/ruby-programming-language.png">
+<img src="https://www.rustacean.net/assets/cuddlyferris.svg" alt="Ferris" width="48px" height="48px"><img src="https://img.icons8.com/officel/40/000000/hearts.png"><img src="https://img.icons8.com/color/48/000000/ruby-programming-language.png">
 
 A Rust library focused on implementing one of the **BEST** features in Ruby `attr_reader`, `attr_writer`, and `attr_accessor` using procedural macros in Rust. The main goal being to reduce the common getter and setter methods with a single macro to reduce time spent on boilerplate and allow for more time to spend tackling more interesting problems!
 
