@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate attr;
+extern crate attr_rs;
 
 #[attr_accessor(name, age)]
 struct Person<'a> {

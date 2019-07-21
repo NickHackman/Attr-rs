@@ -1,5 +1,5 @@
 [package]
-name = "attr"
+name = "attr-rs"
 version = "0.1.0"
 authors = ["Nick Hackman <snickhackman@gmail.com>"]
 edition = "2018"
