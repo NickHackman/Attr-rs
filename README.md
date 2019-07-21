@@ -59,7 +59,7 @@ impl Person {
 
 ```rust
 #[macro_use]
-extern crate attr;
+extern crate attr_rs;
 
 #[attr_accessor(name, age)]
 struct Person {
@@ -78,7 +78,7 @@ Add to your `Cargo.toml`
 
 ```toml
 [dependencies]
-attr = "0.1.0"
+attr_rs = "0.1.0"
 ```
 
 ### Errors
