@@ -33,7 +33,7 @@ struct Person {
 }
 
 impl Person {
-	pub fn new(name: String, age: u64) -> Self {
+    pub fn new(name: String, age: u64) -> Self {
     	Self { name, age }
     }
 
@@ -68,7 +68,7 @@ struct Person {
 }
 
 impl Person {
-	pub fn new(name: String, age: u64) -> Self {
+    pub fn new(name: String, age: u64) -> Self {
     	Self { name, age }
     }
 }
