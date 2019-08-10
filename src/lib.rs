@@ -93,8 +93,8 @@
 extern crate proc_macro;
 extern crate proc_macro2;
 
-use proc_macro::{TokenStream, TokenTree};
-use proc_macro2::Span;
+use proc_macro::TokenStream;
+use proc_macro2::{Span, TokenTree};
 use quote::quote;
 use std::collections::HashMap;
 use syn::{parse_macro_input, Fields, ItemStruct, Type};
@@ -118,28 +118,28 @@ use syn::{parse_macro_input, Fields, ItemStruct, Type};
 /// # Returns
 /// HashMap<String, Type> where the String is the attribute specified and the Type is the type of
 /// the corresponding struct field
-fn relate_args_to_fields(args: TokenStream, fields: Fields) -> HashMap<String, Type> {
+fn relate_args_to_fields(args: proc_macro2::TokenStream, fields: Fields) -> HashMap<String, Type> {
     let mut map: HashMap<String, Type> = HashMap::new();
     for arg in args {
         match arg {
             TokenTree::Punct(..) => continue,
             TokenTree::Ident(ident) => {
                 let ident = ident.to_string();
-                match fields
-                    .iter()
-                    .find(|v| return v.ident.as_ref().unwrap().to_string() == ident)
-                {
+                match fields.iter().find(|v| *v.ident.as_ref().unwrap() == ident) {
                     Some(field) => {
                         if map.contains_key(&ident) {
-                            panic!("Duplicate Attr name specified \'{}\'", ident);
+                            panic!("Duplicate Attribute specified \"{}\"", ident);
                         }
-                        map.insert(ident, field.ty.clone());
+                        map.insert(ident.to_string(), field.ty.clone());
                     }
-                    None => panic!("Unknown field \'{}\'", ident),
+                    None => {
+                        panic!("Unknown field \"{}\"", ident);
+                    }
                 }
             }
-            TokenTree::Group(field) => panic!("Unexpected token \'{}\', expected Ident", field),
-            TokenTree::Literal(field) => panic!("Unexpected token \'{}\', expected Ident", field),
+            _ => {
+                panic!("Expected Ident got \'{}\'", arg);
+            }
         }
     }
     map
@@ -189,7 +189,7 @@ fn relate_args_to_fields(args: TokenStream, fields: Fields) -> HashMap<String, T
 pub fn attr_reader(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
     let structure_name = structure.ident.clone();
-    let getters = relate_args_to_fields(args, structure.fields.clone());
+    let getters = relate_args_to_fields(args.into(), structure.fields.clone());
     let mut getter_fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in getters.iter() {
         getter_fns.push(create_getter(key, value));
@@ -248,7 +248,7 @@ pub fn attr_reader(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn attr_writer(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
     let structure_name = structure.ident.clone();
-    let setters = relate_args_to_fields(args, structure.fields.clone());
+    let setters = relate_args_to_fields(args.into(), structure.fields.clone());
     let mut setter_fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in setters.iter() {
         setter_fns.push(create_setter(key, value));
@@ -317,7 +317,7 @@ pub fn attr_writer(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn attr_accessor(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
     let structure_name = structure.ident.clone();
-    let field_map = relate_args_to_fields(args, structure.fields.clone());
+    let field_map = relate_args_to_fields(args.into(), structure.fields.clone());
     let mut fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in field_map.iter() {
         fns.push(create_setter(key, value));
@@ -352,13 +352,12 @@ pub fn attr_accessor(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 fn create_getter(attribute: &str, attr_type: &Type) -> proc_macro2::TokenStream {
     let fn_def = syn::Ident::new(&format!("get_{}", attribute), Span::call_site());
-    let value = syn::Ident::new(&format!("{}", attribute), Span::call_site());
-    (quote! {
+    let value = syn::Ident::new(&attribute.to_string(), Span::call_site());
+    quote! {
         pub fn #fn_def(&self) -> &#attr_type {
             &self.#value
         }
-    })
-    .into()
+    }
 }
 
 /// # Description
@@ -380,11 +379,10 @@ fn create_getter(attribute: &str, attr_type: &Type) -> proc_macro2::TokenStream 
 /// ```
 fn create_setter(attribute: &str, attr_type: &Type) -> proc_macro2::TokenStream {
     let fn_def = syn::Ident::new(&format!("set_{}", attribute), Span::call_site());
-    let value = syn::Ident::new(&format!("{}", attribute), Span::call_site());
-    (quote! {
+    let value = syn::Ident::new(&attribute.to_string(), Span::call_site());
+    quote! {
         pub fn #fn_def(&mut self, value: #attr_type) {
             self.#value = value;
         }
-    })
-    .into()
+    }
 }
