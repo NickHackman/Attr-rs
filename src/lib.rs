@@ -118,8 +118,11 @@ use syn::{parse_macro_input, Fields, ItemStruct, Type};
 /// # Returns
 /// HashMap<String, Type> where the String is the attribute specified and the Type is the type of
 /// the corresponding struct field
-fn relate_args_to_fields(args: proc_macro2::TokenStream, fields: Fields) -> HashMap<String, Type> {
-    let mut map: HashMap<String, Type> = HashMap::new();
+fn relate_args_to_fields(
+    args: proc_macro2::TokenStream,
+    fields: &Fields,
+) -> HashMap<String, &Type> {
+    let mut map: HashMap<String, &Type> = HashMap::new();
     for arg in args {
         match arg {
             TokenTree::Punct(..) => continue,
@@ -130,7 +133,7 @@ fn relate_args_to_fields(args: proc_macro2::TokenStream, fields: Fields) -> Hash
                         if map.contains_key(&ident) {
                             panic!("Duplicate Attribute specified \"{}\"", ident);
                         }
-                        map.insert(ident.to_string(), field.ty.clone());
+                        map.insert(ident, &field.ty);
                     }
                     None => {
                         panic!("Unknown field \"{}\"", ident);
@@ -188,8 +191,8 @@ fn relate_args_to_fields(args: proc_macro2::TokenStream, fields: Fields) -> Hash
 #[proc_macro_attribute]
 pub fn attr_reader(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
-    let structure_name = structure.ident.clone();
-    let getters = relate_args_to_fields(args.into(), structure.fields.clone());
+    let structure_name = &structure.ident;
+    let getters = relate_args_to_fields(args.into(), &structure.fields);
     let mut getter_fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in getters.iter() {
         getter_fns.push(create_getter(key, value));
@@ -247,8 +250,8 @@ pub fn attr_reader(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn attr_writer(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
-    let structure_name = structure.ident.clone();
-    let setters = relate_args_to_fields(args.into(), structure.fields.clone());
+    let structure_name = &structure.ident;
+    let setters = relate_args_to_fields(args.into(), &structure.fields);
     let mut setter_fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in setters.iter() {
         setter_fns.push(create_setter(key, value));
@@ -316,8 +319,8 @@ pub fn attr_writer(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn attr_accessor(args: TokenStream, input: TokenStream) -> TokenStream {
     let structure = parse_macro_input!(input as ItemStruct);
-    let structure_name = structure.ident.clone();
-    let field_map = relate_args_to_fields(args.into(), structure.fields.clone());
+    let structure_name = &structure.ident;
+    let field_map = relate_args_to_fields(args.into(), &structure.fields);
     let mut fns: Vec<proc_macro2::TokenStream> = Vec::new();
     for (key, value) in field_map.iter() {
         fns.push(create_setter(key, value));
